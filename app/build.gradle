@@ -25,6 +25,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            android.applicationVariants.all { variant ->
+                variant.outputs.all {
+                    outputFileName = "the_watcher_${variant.buildType.name}_${defaultConfig.versionName}.apk"
+                }
+            }
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
