@@ -14,6 +14,8 @@ import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
 import android.util.Log.e
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
@@ -42,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         prefs = PreferenceManager.getDefaultSharedPreferences(application)
         requestUsageStatsPermission()
+        requestUsageOverlayPermission()
 
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val alarmIntent = Intent(this, MyBroadCastReceiver::class.java)
@@ -57,25 +60,41 @@ class MainActivity : AppCompatActivity() {
         close_btn.setOnClickListener {
             finish()
         }
+        permission_manage_overlay_btn.setOnClickListener {
+            requestUsageOverlayPermission()
+        }
+        permission_usage_access_btn.setOnClickListener {
+            requestUsageStatsPermission()
+        }
 
         getHtmlFromWeb()
     }
-    fun requestUsageStatsPermission() {
+    private fun requestUsageStatsPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1
                 && !hasUsageStatsPermission(this)) {
+            permission_usage_access_btn.visibility = View.VISIBLE
             val intent = Intent(
                 Settings.ACTION_USAGE_ACCESS_SETTINGS,
                 Uri.parse("package:" + this.packageName)
             )
             startActivityForResult(intent, REQ_CODE_ACTION_USAGE_ACCESS_SETTINGS)
+        } else {
+            Toast.makeText(this, "Already Allowed Usage Access Permission", Toast.LENGTH_SHORT).show()
+            permission_usage_access_btn.visibility = View.INVISIBLE
         }
+    }
+    private fun requestUsageOverlayPermission () {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
+                permission_manage_overlay_btn.visibility = View.VISIBLE
                 val intent = Intent(
                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + this.packageName)
                 )
                 startActivityForResult(intent, REQ_CODE_ACTION_MANAGE_OVERLAY_PERMISSION)
+            } else {
+                Toast.makeText(this, "Already Allowed Manage Overlay Permission", Toast.LENGTH_SHORT).show()
+                permission_manage_overlay_btn.visibility = View.INVISIBLE
             }
         }
     }
